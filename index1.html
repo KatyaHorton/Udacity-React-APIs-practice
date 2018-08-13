@@ -17,12 +17,6 @@
 		img {
 			height:200px;
 		}
-		
-		.infoTitle {
-			text-align: center;
-			font-weight: bold;
-			font-size: 30px;
-		}
 	  </style>
 	  <script>
 	
@@ -42,49 +36,46 @@
         // Normally we'd have these in a database instead.
 
         var locations = [
-{title: 'Trafalgar Tavern', location: {lat: 51.4846, lng: -0.0043}, image: "trafalgar.jpg"},
-{title: 'Cutty Sark Station', location: {lat: 51.4817, lng: -0.0085}, image: "Kots.jpg"},
-{title: 'Gipsy Moth', location: {lat: 51.4832, lng: -0.0085}, image: "Kots.jpg"},
-{title: 'Mogul', location: {lat: 51.4810, lng: -0.0093}, image: "mogul.jpg"},
-{title: 'Cutty Sark pub', location: {lat: 51.4864, lng: 0.0004}, image: "cuttySark.jpg"},
-{title: 'The Sail Loft', location: {lat: 51.4830, lng: -0.0115}, image: "sailLoft.jpg"},
-{title: 'Greenwich Tavern', location: {lat: 51.4798, lng: -0.0071}, image: "greenwichTavern.jpg"},
-{title: 'Champagne and Fromage', location: {lat: 51.4820, lng: -0.0093}, image: "Champagne.jpg"}
-			
+          {title: 'Our house', location: {lat: 1.4903, lng: 1.0038}, image: "Kots.jpg"},
+          {title: 'Cutty Sark Station', location: {lat: 51.4817, lng: -0.0085}, image: "Kots.jpg"},
+          {title: 'Gipsy Moth', location: {lat: 51.4832, lng: -0.0085}, image: "Kots.jpg"},
+          {title: 'Queens House', location: {lat: 51.4811, lng: 0.0037}, image: "qhouse.jpeg"},
+		  {title: 'Cutty Sark pub', location: {lat: 51.4864, lng: 0.0004}, image: "cuttySark.jpg"},		
+			 {title: 'Mamochkas house', location: {lat: 55.8190, lng: 37.4987}, image: "mamochka.jpg"},	
         ];			  
 
 		  
 		  
         var largeInfowindow = new google.maps.InfoWindow();
         var bounds = new google.maps.LatLngBounds();
-		  
-		  locations.map((location) => {
-			  var position = location.location;
-			  var title = location.title;
-		  	  var image = location.image;
-			  var marker = new google.maps.Marker({
-				  map: map, 
-				  position: position,
-            	  title: title,
-            	  animation: google.maps.Animation.DROP,
-			      image: image
-				  
-			  });
+        // The following group uses the location array to create an array of markers on initialize.
+        for (var i = 0; i < locations.length; i++) {
+          // Get the position from the location array.
+          var position = locations[i].location;
+          var title = locations[i].title;
+		  var image = locations[i].image;
+          // Create a marker per location, and put into markers array.
+          var marker = new google.maps.Marker({
+            map: map,
+            position: position,
+            title: title,
+            animation: google.maps.Animation.BOUNCE,
+            id: i,
+			image: image
 			  
-			  markers.push(marker);
-			  marker.addListener('click', function() {
-              	populateInfoWindow(this, largeInfowindow);
-          	});
-          bounds.extend(marker.position);
-			  
-		  })
-		  
-		  
+          });
+
+          // Push the marker to our array of markers.
+          markers.push(marker);
+          // Create an onclick event to open an infowindow at each marker.
+          marker.addListener('click', function() {
+            populateInfoWindow(this, largeInfowindow);
+          });
+          bounds.extend(markers[i].position);
+        }
         // Extend the boundaries of the map for each marker
         map.fitBounds(bounds);
-      } 
-		  
-		  
+      }
       // This function populates the infowindow when the marker is clicked. We'll only allow
       // one infowindow which will open at the marker that is clicked, and populate based
       // on that markers position.
@@ -92,7 +83,7 @@
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
           infowindow.marker = marker;
-          infowindow.setContent('<div class="infoTitle">' + marker.title + '</div><img src=' + marker.image + '>');
+          infowindow.setContent('<div>' + marker.title + '</div><img src=' + marker.image + '>');
           infowindow.open(map, marker);
           // Make sure the marker property is cleared if the infowindow is closed.
           infowindow.addListener('closeclick',function(){
