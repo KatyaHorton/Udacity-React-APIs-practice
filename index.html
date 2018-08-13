@@ -10,12 +10,14 @@
         padding: 0;
       }
 		
-		#map {
-			height: 100%;	
-		}
+	     .container {
+        height: 100%;
+        position: relative;
+      }
 		
 		img {
 			height:200px;
+			align-self: center;
 		}
 		
 		.infoTitle {
@@ -23,21 +25,55 @@
 			font-weight: bold;
 			font-size: 30px;
 		}
+		
+	   input {
+        font-size: 12px;
+      }
+      h1 {
+        color: #525454;
+        font-size: 22px;
+        margin: 0 0 10px 0;
+        text-align: center;
+      }
+      #hide-listings,
+      #show-listings {
+        width: 48%;
+      }
+      #map {
+        bottom:0px;
+        height: 100%;
+        left: 362px;
+        position: absolute;
+        right: 0px;
+      }
+      .options-box {
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 3px;
+        height: 100%;
+        line-height: 35px;
+        padding: 10px 10px 30px 10px;
+        text-align: left;
+        width: 340px;
+
 	  </style>
 	  <script>
 	
-	 var map;
+	  var map;
       // Create a new blank array for all the listing markers.
       var markers = [];
 		  
+	
+
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
        
 
-   map = new google.maps.Map(document.getElementById('map'), {
+		map = new google.maps.Map(document.getElementById('map'), {
               							center: {lat: 51.4826, lng: 0},
             							zoom: 13				
 									   });
+		  
         // These are the real estate listings that will be shown to the user.
         // Normally we'd have these in a database instead.
 
@@ -56,14 +92,30 @@
 		  
 		  
         var largeInfowindow = new google.maps.InfoWindow();
-        var bounds = new google.maps.LatLngBounds();
+        
+		  
+		showListings = () => {
+			var bounds = new google.maps.LatLngBounds();
+			markers.map(marker => {
+				marker.setMap(map);
+				bounds.extend(marker.position);
+			})
+			map.fitBounds(bounds);
+		};
+		  
+		hideListings = ()  => {
+			markers.map(marker => {
+				marker.setMap(null);
+			})
+		} 
+		
 		  
 		  locations.map((location) => {
 			  var position = location.location;
 			  var title = location.title;
 		  	  var image = location.image;
 			  var marker = new google.maps.Marker({
-				  map: map, 
+// map parametr for the marker (map: map) will be set in the addListings function
 				  position: position,
             	  title: title,
             	  animation: google.maps.Animation.DROP,
@@ -75,15 +127,20 @@
 			  marker.addListener('click', function() {
               	populateInfoWindow(this, largeInfowindow);
           	});
-          bounds.extend(marker.position);
+          
 			  
 		  })
 		  
 		  
+		  
+		document.getElementById('show-listings').addEventListener('click', showListings);
+		document.getElementById('hide-listings').addEventListener('click', hideListings);
+		  
         // Extend the boundaries of the map for each marker
-        map.fitBounds(bounds);
+        
       } 
 		  
+	
 		  
       // This function populates the infowindow when the marker is clicked. We'll only allow
       // one infowindow which will open at the marker that is clicked, and populate based
@@ -100,7 +157,10 @@
 			
           });
         }
-      }
+		  
+      };
+		  
+		 
 
 	  </script>
 		  
@@ -108,7 +168,17 @@
 	</head>
 	<body>
 		
-		<div id='map'></div>
+		<div class='container'>
+			<div class='options-box'>
+				<h1>Find a place to eat in Greenwich</h1>
+				<div>
+					<input id='show-listings' type='button' value='Show listings'>
+					<input id='hide-listings' type='button' value='Hide listings'>	
+				</div>
+			</div>
+			<div id='map'></div>
+		</div>
+		
    
 
     <script async defer
