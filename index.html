@@ -60,41 +60,92 @@
 	  <script>
 	
 	  var map;
-      // Create a new blank array for all the listing markers.
+    
+// Create a new blank array for all the listing markers.
       var markers = [];
-		  
 	
 
       function initMap() {
-        // Constructor creates a new map - only center and zoom are required.
-       
-
-		map = new google.maps.Map(document.getElementById('map'), {
+		  
+		  var styles = [
+			  
+			  
+			  {
+				  featureType: 'road',
+				  stylers: [
+					 { color: '#f7efdc'},
+					 { lightness: -20 }, 
+					 { visibility: 'simplified'}
+				  ]
+			  },
+			  {
+				  featureType: 'water',
+				  stylers: [
+					  { color: '#59a0b2' }, 
+					  { lightness: 35	 }
+				  ]
+			  },{
+				  featureType: 'landscape', 
+				  elementTyoe: 'geometry.stroke',
+				  stylers: [
+					  { color: '#f7efdc'},
+					  { lightness: 20 }
+				  ]
+			  },{
+				  featureType: 'poi.park', 
+				  stylers: [
+					   { color: '#98b354'},
+					  { lightness: 60 }, 
+					  { visibility: 'simplified'}
+					  
+				  ]				  
+			  },{
+				  featureType: 'all', 
+				  elementType: 'labels.text.fill', 
+				  stylers: [
+					  { color: '#8d492d'}
+				  ]
+				  
+			  }
+			  
+		  ];
+		  
+		  
+		
+// Constructor creates a new map - only center and zoom are required.
+		  map = new google.maps.Map(document.getElementById('map'), {
               							center: {lat: 51.4826, lng: 0},
-            							zoom: 13				
+            							zoom: 13, 
+			  							styles: styles
 									   });
 		  
-        // These are the real estate listings that will be shown to the user.
+		  
+// These are the real estate listings that will be shown to the user.
         // Normally we'd have these in a database instead.
 
         var locations = [
-{title: 'Trafalgar Tavern', location: {lat: 51.4846, lng: -0.0043}, image: "trafalgar.jpg"},
-{title: 'Cutty Sark Station', location: {lat: 51.4817, lng: -0.0085}, image: "Kots.jpg"},
-{title: 'Gipsy Moth', location: {lat: 51.4832, lng: -0.0085}, image: "Kots.jpg"},
-{title: 'Mogul', location: {lat: 51.4810, lng: -0.0093}, image: "mogul.jpg"},
-{title: 'Cutty Sark pub', location: {lat: 51.4864, lng: 0.0004}, image: "cuttySark.jpg"},
-{title: 'The Sail Loft', location: {lat: 51.4830, lng: -0.0115}, image: "sailLoft.jpg"},
-{title: 'Greenwich Tavern', location: {lat: 51.4798, lng: -0.0071}, image: "greenwichTavern.jpg"},
-{title: 'Champagne and Fromage', location: {lat: 51.4820, lng: -0.0093}, image: "Champagne.jpg"}
-			
-        ];			  
+			{title: 'Trafalgar Tavern', location: {lat: 51.4846, lng: -0.0043}, image: "trafalgar.jpg"},
+			{title: 'Cutty Sark Station', location: {lat: 51.4817, lng: -0.0085}, image: "Kots.jpg"},
+			{title: 'Gipsy Moth', location: {lat: 51.4832, lng: -0.0085}, image: "Kots.jpg"},
+			{title: 'Mogul', location: {lat: 51.4810, lng: -0.0093}, image: "mogul.jpg"},
+			{title: 'Cutty Sark pub', location: {lat: 51.4864, lng: 0.0004}, image: "cuttySark.jpg"},
+			{title: 'The Sail Loft', location: {lat: 51.4830, lng: -0.0115}, image: "sailLoft.jpg"},
+			{title: 'Greenwich Tavern', location: {lat: 51.4798, lng: -0.0071}, image: "greenwichTavern.jpg"},
+			{title: 'Champagne and Fromage', location: {lat: 51.4820, lng: -0.0093}, image: "Champagne.jpg"}
+
+					];			  
+
 
 		  
-		  
         var largeInfowindow = new google.maps.InfoWindow();
-        
 		  
+		var defaultIcon = makeMarkerIcon('f7efdc');
+		  
+		var highlightedIcon = makeMarkerIcon('960a11');   
+        
+//function for button to show listings
 		showListings = () => {
+// Extend the boundaries of the map for each marker		
 			var bounds = new google.maps.LatLngBounds();
 			markers.map(marker => {
 				marker.setMap(map);
@@ -103,13 +154,14 @@
 			map.fitBounds(bounds);
 		};
 		  
+//function for button to hide listings
 		hideListings = ()  => {
 			markers.map(marker => {
 				marker.setMap(null);
 			})
 		} 
-		
-		  
+
+//map over locations array to assign propertys to them and display on a map		
 		  locations.map((location) => {
 			  var position = location.location;
 			  var title = location.title;
@@ -119,16 +171,29 @@
 				  position: position,
             	  title: title,
             	  animation: google.maps.Animation.DROP,
-			      image: image
+			      image: image, 
+				  icon: defaultIcon
 				  
 			  });
 			  
 			  markers.push(marker);
+			  
 			  marker.addListener('click', function() {
               	populateInfoWindow(this, largeInfowindow);
-          	});
-          
+			  });
+//creates an event listener, when marker is hovered it changes color			  
+			  marker.addListener('mouseover', function() {
+				  this.setIcon(highlightedIcon)
+			  });
 			  
+//creates an event listener, when marker is unhovered, it changes color back to default					  
+			marker.addListener('mouseout', function() {
+				this.setIcon(defaultIcon)
+			})  
+
+	  
+          	
+					  
 		  })
 		  
 		  
@@ -136,7 +201,7 @@
 		document.getElementById('show-listings').addEventListener('click', showListings);
 		document.getElementById('hide-listings').addEventListener('click', hideListings);
 		  
-        // Extend the boundaries of the map for each marker
+    
         
       } 
 		  
@@ -149,7 +214,10 @@
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
           infowindow.marker = marker;
-          infowindow.setContent('<div class="infoTitle">' + marker.title + '</div><img src=' + marker.image + '>');
+          infowindow.setContent('<div class="infoTitle">' +
+								marker.title + '</div> <div>'
+								+ marker.position
+								+ '</div><img src=' + marker.image + '>');
           infowindow.open(map, marker);
           // Make sure the marker property is cleared if the infowindow is closed.
           infowindow.addListener('closeclick',function(){
@@ -159,7 +227,17 @@
         }
 		  
       };
-		  
+		
+       makeMarkerIcon = (markerColor) => {
+        var markerImage = new google.maps.MarkerImage(
+          'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+          '|40|_|%E2%80%A2',
+          new google.maps.Size(21, 34),
+          new google.maps.Point(0, 0),
+          new google.maps.Point(10, 34),
+          new google.maps.Size(21,34));
+        return markerImage;
+      } 
 		 
 
 	  </script>
@@ -188,3 +266,13 @@
 
   </body>
 </html>
+
+
+
+
+
+
+	
+				
+	 
+
