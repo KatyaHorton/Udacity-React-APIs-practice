@@ -68,7 +68,10 @@
         position: relative;
         margin-left: 10px;
       }
-		  
+		  		
+		#search-area-div {
+			display: none;
+		}	
 		  
 	  </style>
 	  <script>
@@ -129,7 +132,10 @@
 var defaultIcon = makeMarkerIcon('e5999d', 21, 34, 34);
 		  
 var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);   
-        		  
+
+//	Global variables fpr serach area related divs
+var searchArea = document.getElementById('search-area');	 
+var searchAreaDiv = document.getElementById('search-area-div');	 
 		
 // Constructor creates a new map - only center and zoom are required.
 		  map = new google.maps.Map(document.getElementById('map'), {
@@ -184,13 +190,20 @@ var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);
 				bounds.extend(marker.position);
 			})
 			map.fitBounds(bounds);
+
+//Remove specified searched area related divs  			
+		searchArea.textContent = '';	
+		searchAreaDiv.style.display = 'none';
 		};
 		  
 //function for button to hide listings
 		hideListings = ()  => {
 			markers.map(marker => {
 				marker.setMap(null);
-			})
+			});
+//Remove specified searched area related divs			
+		searchArea.textContent = '';	
+		searchAreaDiv.style.display = 'none';	
 		} 
 
 //map over locations array to assign propertys to them and display on a map		
@@ -229,7 +242,10 @@ var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);
 	 
 	 		document.getElementById('toggle-drawing').addEventListener('click', function() {
           		toggleDrawing(drawingManager);
-        	});
+			});
+	 
+
+	 
 	 
 	 
 // Add an event listener so that the polygon is captured,  call the
@@ -252,6 +268,14 @@ var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);
 // Make sure the search is re-done if the poly is changed.
           polygon.getPath().addListener('set_at', searchWithinPolygon);
           polygon.getPath().addListener('insert_at', searchWithinPolygon);
+			
+//create variable for the poligon area	
+	var polygonArea = google.maps.geometry.spherical.computeArea(polygon.getPath());		
+		
+//display initially hidden div for the search area, set the content of it equal to the area calculated 			
+		searchArea.textContent = polygonArea.toFixed(0);	
+		searchAreaDiv.style.display = 'block';	
+			
         });
   
 	  		
@@ -374,9 +398,12 @@ var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);
 					<input id='show-listings' type='button' value='Show all listings'>
 					<input id='hide-listings' type='button' value='Hide listings'>	
 					<hr>
-					<span class="text"> Draw a shape to search within for places to eat!</span>
+					<span class="text"> Draw a shape to search within that shape for places to eat!</span>
 					<input id="toggle-drawing"  type="button" value="Drawing Tools">
 				</div>
+				<hr>	
+				<div id='search-area-div'>Area you are searching within is: 
+					<span id='search-area'></span> m2.</div>	
 			</div>
 			<div id='map'></div>
 		</div>
