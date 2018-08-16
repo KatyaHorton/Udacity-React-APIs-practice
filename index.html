@@ -39,6 +39,13 @@
       #show-listings {
         width: 48%;
       }
+		
+		    #pano {
+        width: 200px;
+        height: 200px;
+      }
+
+		
       #map {
         bottom:0px;
         height: 100%;
@@ -110,7 +117,10 @@
 			  
 		  ];
 		  
+var defaultIcon = makeMarkerIcon('e5999d', 21, 34, 34);
 		  
+var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);   
+        		  
 		
 // Constructor creates a new map - only center and zoom are required.
 		  map = new google.maps.Map(document.getElementById('map'), {
@@ -139,10 +149,7 @@
 		  
         var largeInfowindow = new google.maps.InfoWindow();
 		  
-		var defaultIcon = makeMarkerIcon('f7efdc');
-		  
-		var highlightedIcon = makeMarkerIcon('960a11');   
-        
+
 //function for button to show listings
 		showListings = () => {
 // Extend the boundaries of the map for each marker		
@@ -189,57 +196,90 @@
 //creates an event listener, when marker is unhovered, it changes color back to default					  
 			marker.addListener('mouseout', function() {
 				this.setIcon(defaultIcon)
-			})  
-
-	  
-          	
-					  
+			})  		  
 		  })
-		  
-		  
-		  
+		    
 		document.getElementById('show-listings').addEventListener('click', showListings);
-		document.getElementById('hide-listings').addEventListener('click', hideListings);
-		  
-    
-        
+		document.getElementById('hide-listings').addEventListener('click', hideListings); 
       } 
 		  
 	
 		  
-      // This function populates the infowindow when the marker is clicked. We'll only allow
-      // one infowindow which will open at the marker that is clicked, and populate based
-      // on that markers position.
+// This function populates the infowindow when the marker is clicked. We'll only allow
+// one infowindow which will open at the marker that is clicked, and populate based
+// on that markers position.
       function populateInfoWindow(marker, infowindow) {
-        // Check to make sure the infowindow is not already opened on this marker.
+
+// Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
           infowindow.marker = marker;
-          infowindow.setContent('<div class="infoTitle">' +
-								marker.title + '</div> <div>'
-								+ marker.position
-								+ '</div><img src=' + marker.image + '>');
-          infowindow.open(map, marker);
-          // Make sure the marker property is cleared if the infowindow is closed.
-          infowindow.addListener('closeclick',function(){
+
+//clears the infowindow to give the streetview time to load		  
+          infowindow.setContent('');
+      
+// Make sure the marker property is cleared if the infowindow is closed.
+          infowindow.addListener('closeclick', function(){
             infowindow.setMarker = null;
-			
           });
-        }
-		  
+			
+//new streetViewService object 
+			var streetViewService = new google.maps.StreetViewService();			
+		    var radius = 50;	
+	
+// In case the status is OK, which means the pano was found, compute the
+// position of the streetview image, then calculate the heading, then get a
+// panorama from that and set the options
+			function getStreetView(data, status) {
+				if (status == google.maps.StreetViewStatus.OK) {
+					var nearStreetViewLocation = data.location.latLng;
+					
+//compute a heading based on the location of the street View and location of our marker		//geometry libraray loads whebn the API is loaded by using libraries=geometry 			
+					var heading = google.maps.geometry.spherical.computeHeading(
+					nearStreetViewLocation, marker.position);	
+					infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+//set Our panorama options 
+					var panoramaOptions = {
+//position will be nearest street view we just located						
+						position: nearStreetViewLocation,
+//Point Of View - heading we just located and pitch 30 (looking just above the building)	
+						pov: {
+							heading: heading, 
+							pitch: 30
+						} 
+					};
+
+//creates panorama object and put it inside the info window with ID of pano
+					var panorama = new google.maps.StreetViewPanorama(
+					document.getElementById('pano'), panoramaOptions);
+					
+				} else {
+					infowindow.setContent( '<div>' + marker.title + '</div><img src=' + marker.image + '>')
+				}
+			}
+
+//use streetViewService to get closest image
+//within 50 meters radius 			
+			streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+			infowindow.open(map, marker);
+			  
+        } 
       };
 		
-       makeMarkerIcon = (markerColor) => {
+		  
+		  
+       makeMarkerIcon = (markerColor, markerWidth, markerHeight, markerOrigin) => {
         var markerImage = new google.maps.MarkerImage(
           'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
           '|40|_|%E2%80%A2',
-          new google.maps.Size(21, 34),
+          new google.maps.Size(markerWidth, markerHeight),
           new google.maps.Point(0, 0),
-          new google.maps.Point(10, 34),
-          new google.maps.Size(21,34));
+          new google.maps.Point(20, markerOrigin),
+          new google.maps.Size(markerWidth, markerHeight));
         return markerImage;
       } 
 		 
-
+ //   AIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8
+	  
 	  </script>
 		  
 
@@ -257,11 +297,11 @@
 			<div id='map'></div>
 		</div>
 		
-   
+
 
     <script async defer
         src=
-        "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8&v=3&callback=initMap">
+        "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&keyAIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8=&v=3&callback=initMap">
     </script>
 
   </body>
@@ -272,7 +312,13 @@
 
 
 
+
+
 	
 				
+			  /*'<div class="infoTitle">' +
+								marker.title + '</div> <div>'
+								+ marker.position
+								+ '</div><img src=' + marker.image + '>'*/
 	 
 
