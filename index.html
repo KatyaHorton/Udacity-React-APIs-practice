@@ -71,18 +71,34 @@
 		  		
 		#search-area-div {
 			display: none;
-		}	
+		}
+		
+		
+		#input-search-div {
+			display: none;
+		}
+		
+		
+	  #zoom-to-area-text {
+        position: relative;
+        width: 70%;
+      }
+		
+      #zoom-to-area {
+        width: 24%;
+      }
 		  
 	  </style>
 	  <script>
-	
-  var map;
+var searchArea = document.getElementById('search-area');
+ 		  
+ var map;
     
 // Create a new blank array for all the listing markers.
  var markers = [];
 
 //global polygo variable		  
- var polygon = null;		  
+ var polygon = null;				  
 
  function initMap() {
 		  
@@ -130,12 +146,11 @@
 		  ];
 		  
 var defaultIcon = makeMarkerIcon('e5999d', 21, 34, 34);
-		  
 var highlightedIcon = makeMarkerIcon('960a11', 31, 50, 50);   
-
-//	Global variables fpr serach area related divs
-var searchArea = document.getElementById('search-area');	 
-var searchAreaDiv = document.getElementById('search-area-div');	 
+var searchArea = document.getElementById('search-area');
+var searchAreaDiv = document.getElementById('search-area-div');
+	 
+ 
 		
 // Constructor creates a new map - only center and zoom are required.
 		  map = new google.maps.Map(document.getElementById('map'), {
@@ -162,7 +177,7 @@ var searchAreaDiv = document.getElementById('search-area-div');
 
 
 		  
-        var largeInfowindow = new google.maps.InfoWindow();
+	  var largeInfowindow = new google.maps.InfoWindow();
 	 
 	 
 	   var drawingManager = new google.maps.drawing.DrawingManager({
@@ -242,6 +257,10 @@ var searchAreaDiv = document.getElementById('search-area-div');
 	 
 	 		document.getElementById('toggle-drawing').addEventListener('click', function() {
           		toggleDrawing(drawingManager);
+			});
+	 
+			document.getElementById('zoom-to-area').addEventListener('click', function() {
+			 zoomToArea();
 			});
 	 
 
@@ -380,8 +399,53 @@ var searchAreaDiv = document.getElementById('search-area-div');
           } else {
             markers[i].setMap(null);
           }
+        }  
+      }	
+		  
+		  
+		  
+// This function takes the input value in the find nearby area text input
+// locates it, and then zooms into that area. This is so that the user can
+// show all listings, then decide to focus on one area of the map.
+      function zoomToArea() {
+
+ var inputSearchDiv = document.getElementById('input-search-div');
+ var inputSearchAddress = document.getElementById('input-search-address');			 
+ var inputSearchLatLng = document.getElementById('input-search-latLng');			 
+		  
+// Initialize the geocoder.
+        var geocoder = new google.maps.Geocoder();
+// Get the address or place that the user entered.
+        var address = document.getElementById('zoom-to-area-text').value;
+// Make sure the address isn't blank.
+        if (address == '') {
+          window.alert('You must enter an area, or address.');
+        } else {
+// Geocode the address/area entered to get the center. Then, center the map
+// on it and zoom in
+          geocoder.geocode(
+            { address: address,
+              componentRestrictions: {locality: 'United Kingdom'}, 
+			  componentRestrictions: {locality: 'London'}
+            }, function(results, status) {
+              if (status == google.maps.GeocoderStatus.OK) {
+                map.setCenter(results[0].geometry.location);
+                map.setZoom(15);
+				  	  alert(results[0].formatted_address);
+				 inputSearchDiv.style.display = 'block'; 
+				  inputSearchAddress.textContent = results[0].formatted_address;
+				  inputSearchLatLng.textContent = results[0].geometry.location;
+				 console.log(results);
+              } else {
+                window.alert('We could not find that location - try entering a more' +
+                    ' specific place.');
+              }
+            });
         }
-      }		  
+		  
+	
+      }
+		  
 		 
  //   AIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8
 	  
@@ -403,7 +467,18 @@ var searchAreaDiv = document.getElementById('search-area-div');
 				</div>
 				<hr>	
 				<div id='search-area-div'>Area you are searching within is: 
-					<span id='search-area'></span> m2.</div>	
+					<span id='search-area'></span> m2.<hr></div>	
+				
+				<div>
+				 <input id="zoom-to-area-text" type="text" placeholder="Enter your favorite area!">
+				 <input id="zoom-to-area" type="button" value="Zoom">
+				</div>
+				
+				<div id='input-search-div'>Your last search results was for: 
+					<span id='input-search-address'></span>
+					<br>
+					Location: <span id='input-search-latLng'></span>
+				</div>
 			</div>
 			<div id='map'></div>
 		</div>
@@ -412,7 +487,7 @@ var searchAreaDiv = document.getElementById('search-area-div');
 
     <script async defer
         src=
-        "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&keyAIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8=&v=3&callback=initMap">
+        "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=&v=3&callback=initMap">
     </script>
 
   </body>
