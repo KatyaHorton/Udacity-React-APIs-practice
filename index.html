@@ -87,6 +87,11 @@
       #zoom-to-area {
         width: 24%;
       }
+		
+	  #search-within-time-text {
+        width: 84%;
+      }
+ 
 		  
 	  </style>
 	  <script>
@@ -263,6 +268,11 @@ var searchAreaDiv = document.getElementById('search-area-div');
 			 zoomToArea();
 			});
 	 
+	 
+	 		document.getElementById('search-within-time').addEventListener('click', function() {
+          		searchWithinTime();
+        	});
+	 
 
 	 
 	 
@@ -296,12 +306,9 @@ var searchAreaDiv = document.getElementById('search-area-div');
 		searchAreaDiv.style.display = 'block';	
 			
         });
-  
-	  		
-	  } 
+  	  } 
 		  
-	
-		  
+
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
@@ -401,9 +408,7 @@ var searchAreaDiv = document.getElementById('search-area-div');
           }
         }  
       }	
-		  
-		  
-		  
+
 // This function takes the input value in the find nearby area text input
 // locates it, and then zooms into that area. This is so that the user can
 // show all listings, then decide to focus on one area of the map.
@@ -446,8 +451,7 @@ var searchAreaDiv = document.getElementById('search-area-div');
 	
       }
 		  
-		 
- //   AIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8
+
 	  
 	  </script>
 		  
@@ -479,15 +483,38 @@ var searchAreaDiv = document.getElementById('search-area-div');
 					<br>
 					Location: <span id='input-search-latLng'></span>
 				</div>
-			</div>
-			<div id='map'></div>
-		</div>
-		
+				<hr>
+				<div>
+				  <span class="text"> Within </span>
+				  <select id="max-duration">
+					<option value="10">10 min</option>
+					<option value="15">15 min</option>
+					<option value="30">30 min</option>
+					<option value="60">1 hour</option>
+				  </select>
+				  <select id="mode">
+					<option value="DRIVING">drive</option>
+					<option value="WALKING">walk</option>
+					<option value="BICYCLING">bike</option>
+					<option value="TRANSIT">transit ride</option>
+				  </select>
+				  <span class="text">of</span>
+				  <input id="search-within-time-text" type="text" placeholder="Ex: Google Office NYC or 75 9th Ave, New York, NY">
+				  <input id="search-within-time" type="button" value="Go">
+				</div>				
+					</div>
+					<div id='map'></div>
+				</div>
+
 
 
     <script async defer
         src=
         "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=&v=3&callback=initMap">
+		
+		
+				 
+ //   AIzaSyC-qQFJpin2n9dhMsENQ0n6P34eZkix0h8
     </script>
 
   </body>
